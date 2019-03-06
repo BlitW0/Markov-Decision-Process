@@ -1,4 +1,4 @@
-# Xtreme TicTacToe Bot
+# AI Assignment 2
 
 ## Team Members
 * Divyesh Jain - 20171171
