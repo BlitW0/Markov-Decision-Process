@@ -198,17 +198,18 @@ if __name__ == '__main__':
     start_state = tuple(get_input_list(int))
     unit_step_reward = get_input_value(float)
 
-    mdp = MDP(board,            # Reward Board
-              E,                # End States
-              W,                # Walls
-              unit_step_reward, # Step Reward
-              0.8,              # Intended Action Probability
-              0.1,              # Wrong Action Probability
-              0.01,             # Convergence Percentage
-              0.99,             # Discount Factor
-              n,                # Number of Rows
-              m                 # Number of Columns
-            )
+    mdp = MDP(
+        board,            # Reward Board
+        E,                # End States
+        W,                # Walls
+        unit_step_reward, # Step Reward
+        0.8,              # Intended Action Probability
+        0.1,              # Wrong Action Probability
+        0.01,             # Convergence Percentage
+        0.99,             # Discount Factor
+        n,                # Number of Rows
+        m                 # Number of Columns
+    )
 
     mdp.value_iteration()
     mdp.calculate_policy()
