@@ -74,7 +74,7 @@ class MDP:
         }
 
     def will_go(self, x, y):
-        return (x, y) not in self.walls and x >= 0 and x < len(self.utility_map) and y >= 0 and y < len(self.utility_map[0]) and self.utility_map[x][y] is not None
+        return (x, y) not in self.walls and x >= 0 and x < self.rows_num and y >= 0 and y < self.cols_num and self.utility_map[x][y] is not None
 
     def get_utility(self, px, py, x, y):
         if self.will_go(x, y):
@@ -99,7 +99,7 @@ class MDP:
                     self.get_utility(x, y, x + dx_w, y + dy_w)
             max_neighbour = max(max_neighbour, value)
 
-        return self.reward[x][y] + self.unit_step_reward + self.discount * max_neighbour
+        return self.unit_step_reward + self.discount * max_neighbour
 
     def value_iteration(self):
 
@@ -109,19 +109,23 @@ class MDP:
         print_board_mysql_style(
             self.utility_map, self.rows_num, self.cols_num)
 
-        while 1:
+        continue_iteration = True
+
+        while continue_iteration:
             new_utility_map = copy.deepcopy(self.utility_map)
-            max_diff = float('-inf')
             iterations += 1
+
+            continue_iteration = False
 
             for i in range(self.rows_num):
                 for j in range(self.cols_num):
                     if (i, j) not in self.end_states and self.will_go(i, j):
                         new_utility_map[i][j] = self.new_utility(i, j)
-                        if self.utility_map[i][j] != 0:
-                            frac_change = (
-                                new_utility_map[i][j] - self.utility_map[i][j])/self.utility_map[i][j]
-                            max_diff = max(max_diff, abs(frac_change))
+
+                    change = abs(new_utility_map[i]
+                                 [j] - self.utility_map[i][j])
+                    if change > abs(self.delta * self.utility_map[i][j]):
+                        continue_iteration = True
 
             self.utility_map = copy.deepcopy(new_utility_map)
 
@@ -129,10 +133,7 @@ class MDP:
             print_board_mysql_style(
                 self.utility_map, self.rows_num, self.cols_num)
 
-            if max_diff == float('-inf'):
-                continue
-
-            if max_diff < self.delta:
+            if not continue_iteration:
                 break
 
     def get_direction(self, x, y):
@@ -165,7 +166,7 @@ class MDP:
         for i in range(self.rows_num):
             for j in range(self.cols_num):
                 if (i, j) in self.end_states:
-                    self.policy[i][j] = 'Goal State' if self.utility_map[i][j] > 0 else 'End State'
+                    self.policy[i][j] = 'Goal State' if self.reward[i][j] > 0 else 'End State'
                 else:
                     if (i, j) in self.walls:
                         self.policy[i][j] = 'Wall'
