@@ -12,11 +12,13 @@ def get_input_value(input_type):
     return input_type(raw_input())
 
 
-def print_board(board):
+def print_board(board, rows_num, cols_num):
     for row in board:
         print ' ',
         for element in row:
-            print element,
+            if type(element) == float:
+                element = round(element, 3)
+            print '%8s' % element,
         print
 
 
@@ -58,19 +60,19 @@ class MDP:
         self.walls = walls
         self.end_states = end_states
         self.unit_step_reward = unit_step_reward
-        self.utility_map = board
+        self.utility_map = copy.deepcopy(board)
         self.probability = probability
         self.alternate_probability = alternate_probability
         self.delta = delta
         self.discount = discount
-        self.reward = board
+        self.reward = copy.deepcopy(board)
         self.rows_num = rows_num
         self.cols_num = cols_num
         self.policy = [['-' for _ in range(cols_num)] for _ in range(rows_num)]
         self.vertical_change = [(1, 0), (-1, 0)]
         self.horizontal_change = [(0, 1), (0, -1)]
         self.dir_char = {
-            (1, 0): 'Go Down', (-1, 0): 'Go Up', (0, 1): 'Go Right', (0, -1): 'Go Left'
+            (1, 0): 'S', (-1, 0): 'N', (0, 1): 'E', (0, -1): 'W'
         }
 
     def will_go(self, x, y):
@@ -82,7 +84,6 @@ class MDP:
         return self.utility_map[px][py]
 
     def new_utility(self, x, y):
-
         max_neighbour = float('-inf')
 
         for (dx, dy) in self.vertical_change:
@@ -102,11 +103,10 @@ class MDP:
         return self.unit_step_reward + self.discount * max_neighbour
 
     def value_iteration(self):
-
         iterations = 0
 
         print '\n Iteration', iterations
-        print_board_mysql_style(
+        print_board(
             self.utility_map, self.rows_num, self.cols_num)
 
         continue_iteration = True
@@ -130,14 +130,13 @@ class MDP:
             self.utility_map = copy.deepcopy(new_utility_map)
 
             print '\n Iteration', iterations
-            print_board_mysql_style(
+            print_board(
                 self.utility_map, self.rows_num, self.cols_num)
 
             if not continue_iteration:
                 break
 
     def get_direction(self, x, y):
-
         max_neighbour = float('-inf')
         max_dir = '-'
 
@@ -162,21 +161,17 @@ class MDP:
         return max_dir
 
     def calculate_policy(self):
-
         for i in range(self.rows_num):
             for j in range(self.cols_num):
                 if (i, j) in self.end_states:
-                    self.policy[i][j] = 'Goal State' if self.reward[i][j] > 0 else 'End State'
+                    self.policy[i][j] = 'F' if self.reward[i][j] > 0 else 'F'
                 else:
-                    if (i, j) in self.walls:
-                        self.policy[i][j] = 'Wall'
-                    else:
+                    if (i, j) not in self.walls:
                         self.policy[i][j] = self.get_direction(i, j)
 
     def print_policy(self):
-
         print '\n Final Policy'
-        print_board_mysql_style(self.policy, self.rows_num, self.cols_num)
+        print_board(self.policy, self.rows_num, self.cols_num)
 
 
 if __name__ == '__main__':

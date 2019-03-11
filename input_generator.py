@@ -24,6 +24,7 @@ W = [
 ]
 
 start_state = (3, 0)
+step_cost = -X/10
 
 print n, m
 
@@ -42,5 +43,5 @@ for (x, y) in W:
 
 print start_state[0], start_state[1]
 
-print -X/10
+print step_cost
 
